@@ -81,7 +81,7 @@ def RunExp(degStart, degEnd, degStep, events, rDet, R, L,appAng):
     degVals=np.arange(degStart, degEnd+degStep, degStep)
     for a in degVals:
         bigSum=0
-        print(f'Doing {a} degree tests...')
+        print(f'Doing {a} degree tests...',file = sys.stderr)
         for i in range(0, events, 1):
             if((i)%(events/10)==0):
                 print(f'{100*(i/events)}%')
@@ -103,24 +103,31 @@ def RunExpOneAng(ang, events):
     L=.1229
     appAng=5.08
     bigSum=0
-    print(f'Doing {a} degree tests...')
+    print(f'Doing {ang} degree tests...',file = sys.stderr)
     for i in range(0, events, 1):
         if((i)%(events/10)==0):
-            print(f'{100*(i/events)}%')
+            print(f'{100*(i/events)}%',file = sys.stderr)
                 
         data = scatter(np.deg2rad(appAng), L, R) #do a scattering event
         #data is structured [xFinal, yFinal, zFinal, thetaKN]
         #thetaHit=np.arctan(data[0]/data[2]) # arctan(x/z)
         thetaHit=np.arctan2(data[0],data[2]) # arctan(x/z)
-        if((R*(thetaHit-np.deg2rad(a)))**2 + data[1]**2 < rDet**2):
+        if((R*(thetaHit-np.deg2rad(ang)))**2 + data[1]**2 < rDet**2):
             bigSum+=1*KN(data[3], 667.1e3) #weighing the count
             
     #counts.append(bigSum) #append the sum for this range once done
-    comb = np.column_stack(ang, bigSum) #format data
-    return comb #return a 2D np array 
+    #comb = np.column_stack(ang, bigSum) #format data
+    #return comb #return a 2D np array 
+    return bigSum
+
 ang=float(sys.argv[1])
-finalList=RunExpOneAng(ang, int(1e6)) #Run the sim real L .1229
-print(f'{finalList[0][0]} {finalList[0][1]}')
+
+finalsum=RunExpOneAng(ang, int(1e7)) #Run the sim real L .1229
+
+print(ang,finalsum)
+#print(f'{finalList[0]} {finalList[1]}')
+
+
 """
 #Write the data to a txt file
 knmcFile=open("MCdataBig.txt", "w")
